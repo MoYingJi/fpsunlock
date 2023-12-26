@@ -12,5 +12,6 @@ include_dir = include_directories('include')
 executable(
     'fpsunlock',
     sources,
-    include_directories: include_dir
+    include_directories: include_dir,
+    win_subsystem: 'windows'
 )
