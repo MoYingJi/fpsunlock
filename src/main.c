@@ -35,17 +35,14 @@ int main(int argc, char **argv) {
 
         default:
             msg_err_a("Usage: wine fpsunlock.exe [FPS] <interval>");
-            return 1;
     }
 
     if (target_fps < 1) {
         msg_err_a("Invalid target FPS value");
-        return 1;
     }
 
     if (interval == 0) {
         msg_err_a("Invalid interval value. Set a negative value to only write once");
-        return 1;
     }
 
     unlock_fps(target_fps, interval);
