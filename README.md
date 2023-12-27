@@ -12,6 +12,8 @@ Example: `fpsunlock.exe 144` - sets the limit value to 144 every 5 seconds.
 
 **Important: You have to start it in the same Wine prefix and using the same Wine binary as the game. The game already has to be running before you start the unlocker.**
 
+**DO NOT PUT THE FPS UNLOCKER INTO THE GAME DIRECTORY.**
+
 ## Safety
 **This program is technically breaking the game's Terms of Service**, although I am not aware of any bans caused just by changing the FPS limit. **Use at your own risk.** If you somehow manage to receive a ban, please report it on the issue tracker.
 
