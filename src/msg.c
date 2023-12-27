@@ -1,5 +1,6 @@
 #include <windows.h>
 #include <stdio.h>
+#include <config.h>
 
 #include <msg.h>
 
@@ -21,8 +22,8 @@
         suffix; \
     }
 
-const char    *TITLE_A = "FPS unlocker";
-const wchar_t *TITLE_W = L"FPS unlocker";
+const char    *TITLE_A = "v" UNLOCKER_VERSION " FPS Unlocker";
+const wchar_t *TITLE_W = L"v" UNLOCKER_VERSION " FPS Unlocker";
 
 // Error
 DEF_MSG_FN(msg_err_a, char, _vsnprintf, MessageBoxA, TITLE_A, MB_OK | MB_ICONERROR, exit(1))
