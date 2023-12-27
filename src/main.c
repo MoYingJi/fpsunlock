@@ -34,17 +34,17 @@ int main(int argc, char **argv) {
             break;
 
         default:
-            printf("Usage: wine fpsunlock.exe [FPS] <interval>\n");
+            msg_err_a("Usage: wine fpsunlock.exe [FPS] <interval>");
             return 1;
     }
 
     if (target_fps < 1) {
-        printf("Invalid target FPS value\n");
+        msg_err_a("Invalid target FPS value");
         return 1;
     }
 
     if (interval == 0) {
-        printf("Invalid interval value. Set a negative value to only write once\n");
+        msg_err_a("Invalid interval value. Set a negative value to only write once");
         return 1;
     }
 
