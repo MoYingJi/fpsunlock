@@ -17,6 +17,11 @@ Example: `fpsunlock.exe 144` - sets the limit value to 144 every 5 seconds.
 ## Safety
 **This program is technically breaking the game's Terms of Service**, although I am not aware of any bans caused just by changing the FPS limit. **Use at your own risk.** If you somehow manage to receive a ban, please report it on the issue tracker.
 
+## Building
+To build the unlocker, you will require meson and mingw. Once all dependencies are installed, run `./build.sh` in this directory. The compiled file will be located at `build/fpsunlock.exe`.
+
+For a debug build, run `./setup.sh` once. Then use `meson compile -C build` to compile the project.
+
 ## Mechanism
 **This FPS unlocker does not inject any code into the game, and instead relies on reading and writing process memory via the WinAPI.**
 
