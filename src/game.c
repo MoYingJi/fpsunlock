@@ -104,16 +104,13 @@ uint32_t *find_fps_var(HANDLE process) {
     }
 
     // Traverse jump chain
-    uint8_t bytes_at_addr[2];
+    uint8_t bytes_at_addr[5];
     uint8_t *potential_mov = setter_addr;
     while (1) {
-        TRY_READ_MEMORY(process, potential_mov, &bytes_at_addr, sizeof(bytes_at_addr));
+        TRY_READ_MEMORY(process, potential_mov, bytes_at_addr, sizeof(bytes_at_addr));
 
         if (bytes_at_addr[0] == 0xE9) { // jmp
-            int32_t jmp_target_offset;
-            TRY_READ_MEMORY(process, potential_mov + 1, &jmp_target_offset, sizeof(jmp_target_offset));
-
-            potential_mov += jmp_target_offset + 5;
+            potential_mov += *((int32_t*)(bytes_at_addr + 1)) + 5;
         } else {
             break;
         }
