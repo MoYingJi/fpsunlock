@@ -3,49 +3,41 @@
 #include <game.h>
 #include <msg.h>
 
-void unlock_fps(int32_t target_fps, int64_t interval) {
+void unlock_fps(int32_t target_fps) {
     HANDLE game = open_game_process();
     if (game == INVALID_HANDLE_VALUE) {
         msg_err_a("Game process not found. The game has to be running before you start the unlocker");
     }
 
-    uint32_t *fps = find_fps_var(game);
-    if (!WriteProcessMemory(game, fps, &target_fps, sizeof(target_fps), NULL)) {
-        msg_err_a("Failed to write FPS: %d", GetLastError());
+    struct fps_data data;
+    find_fps_data(game, &data);
+
+    if (!WriteProcessMemory(game, data.setter_ptr, &data.ret, sizeof(data.ret), NULL)) {
+        msg_err_a("Failed to patch FPS setter pointer: %d", GetLastError());
     }
 
-    if (interval > 0) {
-        while (WriteProcessMemory(game, fps, &target_fps, sizeof(target_fps), NULL)) {
-            Sleep(interval);
-        }
+    if (!WriteProcessMemory(game, data.fps_var, &target_fps, sizeof(target_fps), NULL)) {
+        msg_err_a("Failed to write FPS: %d", GetLastError());
     }
 }
 
 int main(int argc, char **argv) {
     int32_t target_fps;
-    int64_t interval = 5000;
 
     switch (argc) {
-        case 3:
-            interval = atoi(argv[2]);
-
         case 2: 
             target_fps = atoi(argv[1]);
             break;
 
         default:
-            msg_err_a("Usage: wine fpsunlock.exe [FPS] <interval>");
+            msg_err_a("Usage: wine fpsunlock.exe [FPS]");
     }
 
     if (target_fps < 1) {
         msg_err_a("Invalid target FPS value");
     }
 
-    if (interval == 0) {
-        msg_err_a("Invalid interval value. Set a negative value to only write once");
-    }
-
-    unlock_fps(target_fps, interval);
+    unlock_fps(target_fps);
 
     return 0;
 }
