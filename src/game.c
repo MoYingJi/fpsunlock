@@ -104,7 +104,7 @@ uint32_t *find_fps_var(HANDLE process) {
     }
 
     // Traverse jump chain
-    uint8_t bytes_at_addr[5];
+    uint8_t bytes_at_addr[6];
     uint8_t *potential_mov = setter_addr;
     while (1) {
         TRY_READ_MEMORY(process, potential_mov, bytes_at_addr, sizeof(bytes_at_addr));
@@ -121,8 +121,7 @@ uint32_t *find_fps_var(HANDLE process) {
         msg_err_a("Could not find 'mov [fps], ecx'");
     }
 
-    int32_t fps_offset;
-    TRY_READ_MEMORY(process, potential_mov + 2, &fps_offset, sizeof(fps_offset));
+    int32_t fps_offset = *((int32_t*)(bytes_at_addr + 2));
 
     return (uint32_t*)(potential_mov + 6 + fps_offset);
 }
