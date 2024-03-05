@@ -31,7 +31,7 @@ HANDLE open_game_process() {
         msg_err_a("Could not enumerate processes: %d", GetLastError());
     }
 
-    HANDLE process = NULL;
+    HANDLE process = INVALID_HANDLE_VALUE;
     do {
         if (is_game_exe(entry.szExeFile)) {
             process = OpenProcess(PROCESS_ALL_ACCESS, FALSE, entry.th32ProcessID);

@@ -5,7 +5,7 @@
 
 void unlock_fps(int32_t target_fps, int64_t interval) {
     HANDLE game = open_game_process();
-    if (!game) {
+    if (game == INVALID_HANDLE_VALUE) {
         msg_err_a("Game process not found. The game has to be running before you start the unlocker");
     }
 
