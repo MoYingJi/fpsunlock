@@ -1,1 +1,3 @@
+#pragma once
+
 #define UNLOCKER_VERSION "@version@"

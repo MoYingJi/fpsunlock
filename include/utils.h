@@ -1,3 +1,5 @@
+#pragma once
+
 #define COUNT(arr) (sizeof(arr) / sizeof(*arr))
 
 #define TRY_READ_MEMORY(process, addr, buf, size) \
