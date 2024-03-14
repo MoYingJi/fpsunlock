@@ -1,7 +1,7 @@
 # GI FPS Unlocker
 **This small tool allows you to set a custom FPS limit for GI running under Wine**. It does not and is not supposed to work on Windows, please use any of the other existing FPS unlockers if you want that.
 
-**The current version was tested with GI v4.4.0, and should work with future versions too**. If it breaks after an update, please [open an issue](https://codeberg.org/mkrsym1/fpsunlock/issues/new) on this repository's issue tracker.
+**The current version was tested with GI v4.5.0, and should work with future versions too**. If it breaks after an update, please [open an issue](https://codeberg.org/mkrsym1/fpsunlock/issues/new) on this repository's issue tracker.
 
 ## Usage
 **The command line interface is `fpsunlock.exe [FPS] <interval>`, where**:
