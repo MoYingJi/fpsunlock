@@ -4,11 +4,10 @@
 **The current version was tested with GI v4.5.0, and should work with future versions too**. If it breaks after an update, please [open an issue](https://codeberg.org/mkrsym1/fpsunlock/issues/new) on this repository's issue tracker.
 
 ## Usage
-**The command line interface is `fpsunlock.exe [FPS] <interval>`, where**:
+**The command line interface is `fpsunlock.exe [FPS]`, where**:
 - `FPS` - the target framerate value (required)
-- `interval` - the delay between periodic writes in milliseconds (optional, default is 5000). Provide a negative value to disable periodic writes, which will cause the unlocker to exit immediatly after setting the limit once
 
-Example: `fpsunlock.exe 144` - sets the limit value to 144 every 5 seconds.
+Example: `fpsunlock.exe 144` - sets the limit value to 144.
 
 **Important: You have to start it in the same Wine prefix and using the same Wine binary as the game. The game already has to be running before you start the unlocker.**
 
@@ -27,9 +26,9 @@ For a debug build, run `./setup.sh` once. Then use `meson compile -C build` to c
 
 The algorithm is as follows:
 1. Find a process with an executable the name of which matches one of the GI executable names
-2. Scan the game process memory for a pattern using `ReadProcessMemory`, then determine the FPS limit variable address using the found data
-3. Periodically overwrite the FPS limit variable with the set value using `WriteProcessMemory`, or only overwrite it once if periodic writes are disabled. Periodically overwriting the variable is necessary because the game sometimes resets the limit to the one selected in it's own settings (e.g. on domain enter/leave)
-4. If periodic writes are disabled or one of them fails (e.g. if the game gets closed), the unlocker will exit
+2. Scan the game process memory for a pattern using `ReadProcessMemory`, then determine the FPS setter function and limit variable address using the found data
+3. Change the setter function pointer to go to a nearby `ret` instruction instead of the code that changes the FPS variable
+4. Set the FPS limit variable to the specified value
 
 For more details, you can look at the code in this repository.
 
