@@ -116,6 +116,13 @@ void find_fps_data(HANDLE process, struct fps_data *out) {
         }
     }
 
+    // C3    ret
+    // potentially already patched, go 6 bytes back
+    if (bytes_at_addr[0] == 0xC3) {
+        potential_mov -= 6;
+        TRY_READ_MEMORY(process, potential_mov, bytes_at_addr, sizeof(bytes_at_addr));
+    }
+
     // 890D ????????    mov [fps], ecx
     if (bytes_at_addr[0] != 0x89 || bytes_at_addr[1] != 0x0D) {
         msg_err_a("Could not find 'mov [fps], ecx'");
