@@ -77,7 +77,7 @@ HMODULE wait_for_module(HANDLE process, const wchar_t *name) {
     return module;
 }
 
-void find_fps_data(HANDLE process, struct fps_data *out) {
+uint32_t *find_fps_var(HANDLE process) {
     HMODULE userassembly = wait_for_module(process, L"UserAssembly.dll");
 
     int16_t setter_call_pattern[] = {
@@ -92,19 +92,19 @@ void find_fps_data(HANDLE process, struct fps_data *out) {
     int32_t setter_ptr_offset;
     TRY_READ_MEMORY(process, setter_call + 7, &setter_ptr_offset, sizeof(setter_ptr_offset));
 
-    out->setter_ptr = setter_call + 11 + setter_ptr_offset;
-
+    uint8_t *setter_ptr = setter_call + 11 + setter_ptr_offset;
+    
     uint8_t *setter_addr = NULL;
-    TRY_READ_MEMORY(process, out->setter_ptr, &setter_addr, sizeof(setter_addr));
+    TRY_READ_MEMORY(process, setter_ptr, &setter_addr, sizeof(setter_addr));
 
     // Wait for setter addr if it isn't there yet
     while (!setter_addr) {
         Sleep(10);
-        TRY_READ_MEMORY(process, out->setter_ptr, &setter_addr, sizeof(setter_addr));
+        TRY_READ_MEMORY(process, setter_ptr, &setter_addr, sizeof(setter_addr));
     }
 
     // Traverse jump chain
-    uint8_t bytes_at_addr[7];
+    uint8_t bytes_at_addr[6];
     uint8_t *potential_mov = setter_addr;
     while (1) {
         TRY_READ_MEMORY(process, potential_mov, bytes_at_addr, sizeof(bytes_at_addr));
@@ -116,25 +116,12 @@ void find_fps_data(HANDLE process, struct fps_data *out) {
         }
     }
 
-    // C3    ret
-    // potentially already patched, go 6 bytes back
-    if (bytes_at_addr[0] == 0xC3) {
-        potential_mov -= 6;
-        TRY_READ_MEMORY(process, potential_mov, bytes_at_addr, sizeof(bytes_at_addr));
-    }
-
     // 890D ????????    mov [fps], ecx
     if (bytes_at_addr[0] != 0x89 || bytes_at_addr[1] != 0x0D) {
         msg_err_a("Could not find 'mov [fps], ecx'");
     }
 
     int32_t fps_offset = *((int32_t*)(bytes_at_addr + 2));
-    out->fps_var = potential_mov + 6 + fps_offset;
 
-    // C3    ret
-    if (bytes_at_addr[6] != 0xC3) {
-        msg_err_a("'mov [fps], ecx' is not followed by a ret!");
-    }
-
-    out->ret = potential_mov + 6;
+    return (uint32_t*)(potential_mov + 6 + fps_offset);
 }

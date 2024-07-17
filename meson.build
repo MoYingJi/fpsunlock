@@ -1,4 +1,4 @@
-project('fpsunlock', 'c', version: '1.1.0')
+project('fpsunlock', 'c', version: '1.0.2')
 
 sources = [
     'src/main.c',
