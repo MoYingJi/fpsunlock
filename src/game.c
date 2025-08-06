@@ -44,6 +44,26 @@ HANDLE open_game_process() {
     return process;
 }
 
+HANDLE wait_for_game() {
+    const DWORD check_interval = 5000;
+    const DWORD total_interval = 30000;
+
+    DWORD start = GetTickCount();
+    DWORD time = 0;
+
+    while (time < total_interval) {
+        HANDLE game_process = open_game_process();
+        
+        if (game_process != INVALID_HANDLE_VALUE)
+            return game_process;
+
+        Sleep(check_interval);
+        time = GetTickCount() - start;
+    }
+
+    return INVALID_HANDLE_VALUE;
+}
+
 uint32_t *find_fps_var(HANDLE process) {
     HMODULE executable = (HMODULE)0x140000000; // not good but will work
 
