@@ -1,12 +1,11 @@
 #include <windows.h>
-#include <stdio.h>
 #include <game.h>
 #include <msg.h>
 
 void unlock_fps(int32_t target_fps, int64_t interval) {
     HANDLE game = wait_for_game();
     if (game == INVALID_HANDLE_VALUE) {
-        msg_err_a("Game process not found. The game has to be running before you start the unlocker");
+        msg_err_a("Game process not found. The game has to start within 30 seconds after starting the unlocker");
     }
 
     uint32_t *fps = find_fps_var(game);
