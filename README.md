@@ -1,18 +1,49 @@
-# GI FPS Unlocker
+# GI FPS Unlocker for Linux
+
 **WARNING: since v4.8.0 the game regularly reports measured FPS to the server. Use this tool at your own risk.**
 
-**This small tool allows you to set a custom FPS limit for GI running under Wine**. It does not and is not supposed to work on Windows, please use any of the other existing FPS unlockers if you want that.
+**This small native Linux tool allows you to set a custom FPS limit for Genshin Impact running under Wine or Proton**. It is a native application and does not require Wine to run itself, but it targets the game process running within a Wine/Proton environment.
 
-**The current version was tested with GI v4.8.0, and should work with future versions too**. If it breaks after an update, please [open an issue](https://codeberg.org/mkrsym1/fpsunlock/issues/new) on this repository's issue tracker.
+**The current version was tested with Genshin Impact Version Luna I (v6.0), and should work with future versions too**. If it breaks after an update, please open an issue on this repository's issue tracker.
 
 ## Usage
-**The command line interface is `fpsunlock.exe [FPS] <interval>`, where**:
-- `FPS` - the target framerate value (required)
-- `interval` - the delay between periodic writes in milliseconds (optional, default is 5000). Provide a negative value to disable periodic writes, which will cause the unlocker to exit immediatly after setting the limit once
 
-Example: `fpsunlock.exe 144` - sets the limit value to 144 every 5 seconds.
+### 1. One-Time Setup: Permissions
+This tool needs special permissions to read and write another process's memory. Instead of requiring `sudo` for every run, the recommended approach is to grant the compiled binary the `CAP_SYS_PTRACE` capability.
 
-**Important: You have to start it in the same Wine prefix and using the same Wine binary as the game. The game already has to be running before you start the unlocker.**
+**This only needs to be done once after compiling:**
+```bash
+sudo setcap cap_sys_ptrace+ep ./unlocker
+```
+After this, you can run the unlocker as a normal user.
+
+### 2. Find the Game's PID
+The game must be running before you start the unlocker. You will need its Process ID (PID):
+```bash
+wine GenshinImpact.exe &
+/path/to/unlocker $! 120 5000
+```
+
+### 3. Run the Unlocker
+The command line interface is `./unlocker <PID> <FPS> [INTERVAL_MS]`, where:
+-   `<PID>` - The Process ID of the game you found in the previous step (required).
+-   `<FPS>` - The target framerate value (e.g., `120`).
+-   When `FPS <= 0` - A special mode that **only reads and displays** the current FPS limit without making any changes. This is useful for testing.
+-   `[INTERVAL_MS]` - The delay between periodic operations in milliseconds (optional, default is 5000). A negative value will cause the unlocker to perform the action only once and then exit.
+
+**Examples:**
+-   Set the FPS limit to 144 and rewrite it every 5 seconds:
+    ```bash
+    ./unlocker 12345 144
+    ```
+-   Set the FPS limit to 120 only once and exit:
+    ```bash
+    ./unlocker 12345 120 -1
+    ```
+-   Monitor the current in-game FPS limit every second without changing it:
+    ```bash
+    ./unlocker 12345 -1 1000
+    ```
 
 **DO NOT PUT THE FPS UNLOCKER INTO THE GAME DIRECTORY.**
 
@@ -20,20 +51,21 @@ Example: `fpsunlock.exe 144` - sets the limit value to 144 every 5 seconds.
 **This program is technically breaking the game's Terms of Service**, although I am not aware of any bans caused just by changing the FPS limit. **Use at your own risk.** If you somehow manage to receive a ban, please report it on the issue tracker.
 
 ## Building
-To build the unlocker, you will require meson and mingw. Once all dependencies are installed, run `./build.sh` in this directory. The compiled file will be located at `build/fpsunlock.exe`.
-
-For a debug build, run `./setup.sh` once. Then use `meson compile -C build` to compile the project.
+To build the unlocker, you only need a C compiler like `gcc`.
+```bash
+gcc -o unlocker unlocker.c -Wall -Wextra
+```
+The compiled file will be located at `./unlocker`. Remember to run the `setcap` command (see Usage) on the new binary.
 
 ## Mechanism
-**This FPS unlocker does not inject any code into the game, and instead relies on reading and writing process memory via the WinAPI.**
+**This FPS unlocker does not inject any code into the game, and instead relies on reading and writing process memory via native Linux system calls (`process_vm_readv(2)` and `process_vm_writev(2)`).**
 
 The algorithm is as follows:
-1. Find a process with an executable the name of which matches one of the GI executable names
-2. Scan the game process memory for a pattern using `ReadProcessMemory`, then determine the FPS limit variable address using the found data
-3. Periodically overwrite the FPS limit variable with the set value using `WriteProcessMemory`, or only overwrite it once if periodic writes are disabled. Periodically overwriting the variable is necessary because the game sometimes resets the limit to the one selected in it's own settings (e.g. on domain enter/leave)
-4. If periodic writes are disabled or one of them fails (e.g. if the game gets closed), the unlocker will exit
-
-For more details, you can look at the code in this repository.
+1.  Takes the game's Process ID (PID) as a command-line argument.
+2.  Parses the process's memory maps (`/proc/[pid]/maps`) to find the game's main executable regions in virtual memory.
+3.  Scans only these executable regions for a specific byte pattern (signature) to locate the code responsible for setting the FPS limit.
+4.  Traces the assembly instructions from the pattern to calculate the precise memory address of the FPS limit variable.
+5.  Periodically overwrites this variable with the target value. If periodic writes are disabled or a write fails (e.g., the game is closed), the unlocker will exit.
 
 ## Other games
 **For 3rd and SR, using an unlocker program is not required. You can set the FPS values in the registry directly.**
