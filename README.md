@@ -1,4 +1,6 @@
-# GI FPS Unlocker for Linux
+# Genshin Impact FPS Unlocker for Linux
+
+**We will defy this world with a power from beyond.**
 
 **WARNING: since v4.8.0 the game regularly reports measured FPS to the server. Use this tool at your own risk.**
 
@@ -21,8 +23,11 @@ After this, you can run the unlocker as a normal user.
 The game must be running before you start the unlocker. You will need its Process ID (PID):
 ```bash
 wine GenshinImpact.exe &
-/path/to/unlocker $! 120 5000
+sleep 5 && /path/to/unlocker $! 120 5000
 ```
+The `sleep` is used to ensure Genshin Impact is fully launched, preventing failures due to the game process not being ready.
+
+Alternatively, you can use `pgrep` to find the PID of either `YuanShen.exe` or `GenshinImpact.exe` if you prefer not to use `$!`.
 
 ### 3. Run the Unlocker
 The command line interface is `./unlocker <PID> <FPS> [INTERVAL_MS]`, where:
@@ -49,6 +54,8 @@ The command line interface is `./unlocker <PID> <FPS> [INTERVAL_MS]`, where:
 
 ## Safety
 **This program is technically breaking the game's Terms of Service**, although I am not aware of any bans caused just by changing the FPS limit. **Use at your own risk.** If you somehow manage to receive a ban, please report it on the issue tracker.
+
+While this tool operates by directly writing memory from a Linux process - leaving no trace of external processes within the Wine environment - the FPS modification itself creates detectable changes. The game servers can still detect that the FPS limit has been altered through unknown means.
 
 ## Building
 To build the unlocker, you only need a C compiler like `gcc`.
