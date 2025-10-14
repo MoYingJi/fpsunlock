@@ -60,6 +60,14 @@ void* find_pattern_in_process(pid_t pid, uintptr_t start, size_t len, const int1
     return NULL;
 }
 
+int ends_with(const char *str, const char *suffix) {
+    if (!str || !suffix) return 0;
+    size_t len_str = strlen(str);
+    size_t len_suffix = strlen(suffix);
+    if (len_suffix > len_str) return 0;
+    return !strncmp(str + len_str - len_suffix, suffix, len_suffix);
+}
+
 int verify_process(pid_t pid) {
     char path[64];
     FILE* fp;
@@ -73,7 +81,7 @@ int verify_process(pid_t pid) {
     fread(cmdline, 1, sizeof(cmdline) - 1, fp);
     fclose(fp);
 
-    return strstr(cmdline, "GenshinImpact.exe") || strstr(cmdline, "YuanShen.exe");
+    return ends_with(cmdline, "GenshinImpact.exe") || ends_with(cmdline, "YuanShen.exe");
 }
 
 uintptr_t find_fps_var_address(pid_t pid) {
@@ -105,7 +113,7 @@ uintptr_t find_fps_var_address(pid_t pid) {
         }
 
         if (!game_module_found) {
-            if (strstr(path, "GenshinImpact.exe") || strstr(path, "YuanShen.exe")) {
+            if (ends_with(path, "GenshinImpact.exe") || ends_with(path, "YuanShen.exe")) {
                 game_module_found = 1;
             } else {
                 continue;
@@ -130,7 +138,6 @@ uintptr_t find_fps_var_address(pid_t pid) {
         fprintf(stderr, "Error: Could not find the FPS setter pattern.\n");
         goto out_cleanup;
     }
-    printf("Pattern found at remote address: %p\n", (void*)setter_call);
 
     uint8_t instr_bytes[7];
     uint8_t *current_addr = setter_call + 5;
@@ -194,10 +201,8 @@ int main(int argc, char **argv) {
     if (!fps_addr) {
         return 1;
     }
-    printf("Successfully found FPS variable address: 0x%lx\n", fps_addr);
 
     if (is_dry_run) {
-        printf("--- Entering Dry-Run Mode ---\n");
         int32_t current_fps;
         if (interval > 0) {
             while (read_process_memory(pid, fps_addr, &current_fps, sizeof(current_fps))) {
@@ -208,7 +213,6 @@ int main(int argc, char **argv) {
             printf("\n");
         }
     } else {
-        printf("--- Entering Write Mode ---\n");
         if (!write_process_memory(pid, fps_addr, &target_fps, sizeof(target_fps))) {
             return 1;
         }
@@ -220,6 +224,5 @@ int main(int argc, char **argv) {
         }
     }
 
-    printf("Process exited or is no longer accessible, shutting down.\n");
     return 0;
 }
