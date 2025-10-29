@@ -108,7 +108,7 @@ uintptr_t find_fps_var_address(pid_t pid) {
         uintptr_t start, end;
         char perms[5], path[1024] = {0};
         
-        if (sscanf(line, "%lx-%lx %4s %*x %*s %*d %1023s", &start, &end, perms, path) < 3) {
+        if (sscanf(line, "%lx-%lx %4s %*x %*s %*d %1023[^\n]%*c", &start, &end, perms, path) < 3) {
             continue;
         }
 
