@@ -8,7 +8,7 @@
 // 2. Grant capability: `sudo setcap cap_sys_ptrace+ep ./unlocker`
 // 3. Run as a normal user.
 //
-// Usage: ./unlocker <PID> <FPS> [INTERVAL_MS]
+// Usage: ./unlocker <PID> <FPS> [INTERVAL_MS] [FIFO_PATH]
 
 #define _GNU_SOURCE
 #include <stdio.h>
