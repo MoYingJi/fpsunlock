@@ -239,18 +239,18 @@ int main(int argc, char **argv) {
             printf("\n");
         }
     } else {
-        if (setup_fifo(fifo_path)) {
-            fifo_fd = open(fifo_path, O_RDONLY | O_NONBLOCK);
-            if (fifo_fd != -1) {
-                use_fifo = 1;
-            }
-        }
-        
         if (!write_process_memory(pid, fps_addr, &target_fps, sizeof(target_fps))) {
             return 1;
         }
 
         if (interval > 0) {
+            if (setup_fifo(fifo_path)) {
+                fifo_fd = open(fifo_path, O_RDONLY | O_NONBLOCK);
+                if (fifo_fd != -1) {
+                    use_fifo = 1;
+                }
+            }
+            
             while (write_process_memory(pid, fps_addr, &target_fps, sizeof(target_fps))) {
                 if (use_fifo) {
                     char buffer[32];
@@ -270,5 +270,6 @@ int main(int argc, char **argv) {
         }
     }
 
+    close_fifo(fifo_fd, fifo_path);
     return 0;
 }
